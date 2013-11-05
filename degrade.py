@@ -6,6 +6,7 @@
 #	./degrade.py file.txt 80000 47000
 #Output:
 #	file_deg.txt
+noPyFits=False
 try:
 	import pyfits
 except:
@@ -62,7 +63,7 @@ else:
 		flux = [float(el[1]) for el in arr]
 		autoFormat='ascii'
 	except:
-		if noPyfits:
+		if noPyFits:
 			print 'PyFITS could not be imported. Are you trying to read a fits file?'
 		sys.exit('Problem reading the spectrum \"'+fileName+'\".')
 
