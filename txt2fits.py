@@ -162,7 +162,6 @@ if fillGaps==True:
 
 
 #limit max flux!
-print 'Maxflux:',maxFlux
 if maxFlux!=False:
 	maxFluxCounter=0
 	for i,el in enumerate(flux):
