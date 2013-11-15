@@ -37,7 +37,7 @@
 #	EXAMPLES:
 #		./seefits.py file.fits
 #
-#		./seefits.py file.fits[4]
+#		./seefits.py file.fits
 #	
 #		./seefits.py file.txt
 #	

@@ -4,7 +4,6 @@
 #Write two columns: wavelength and flux.
 #Syntax:
 #	./fits2txt.py file.fits
-#	./fits2txt.py[3] file.fits
 #Output:
 #	file.txt
 #
@@ -12,7 +11,7 @@
 #		-noH 	: print no header
 #		-v	: verbose
 #		min=, max=	: to convert only a part of the spectrum
-
+#		ext=2	: to extract extension 2
 #
 #
 import pyfits

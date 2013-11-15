@@ -11,8 +11,6 @@ This can plot spectra contained in FITS files, or in ASCII tables. It is conveni
 
     ./plotSpec.py spectrum.fits spectrum_deg.fits -label0=original -label1=degraded
 
-or:
-
     ./plotSpec.py arcturus.fits[2]
 
 

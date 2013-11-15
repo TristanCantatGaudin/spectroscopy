@@ -205,8 +205,8 @@ if autoFormat=='fits':
 	pyfits.writeto(outputSpectrum,flux,header)
 
 elif autoFormat=='ascii':
-	typ=fileName.split('.')[-1]
-	outFile=fileName.replace('.'+typ,'_deg.'+typ)
+	ext=fileName.split('.')[-1]
+	outFile=fileName.replace('.'+ext,'_deg.'+ext)
 	theFile=open(outFile,"w")
 	theFile.write('#waveobs flux\n')
 	for i,w in enumerate(waveobsDeg):
