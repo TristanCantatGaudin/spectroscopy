@@ -45,6 +45,10 @@ Get a slice of a FITS file spectrum, specifying a wavelength range. By default t
 
     ./cutSpec.py largespectrum.fits 4800 5800 shorterspectrum.fits
 
+or:
+
+    ./cutSpec.py largespectrum[2].fits 4800 5800 shorterspectrum.fits
+
 
 degrade.py
 ----------
