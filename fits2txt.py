@@ -11,6 +11,7 @@
 #		-noH 	: print no header
 #		-v	: verbose
 #		min=, max=	: to convert only a part of the spectrum
+#		ext=2	: to extract extension 2
 #
 #
 import pyfits
@@ -29,18 +30,25 @@ except IndexError:
 outFile=fileName.split('.fits')[0]+'.txt'
 
 
+ext=0	#by default, read extension 0
+for opt in sys.argv:
+	if 'ext=' in opt:
+		ext=int(opt[-4:])
+
+
+
 try:
 ##########             Read the fits file:
 	hdulist = pyfits.open(fileName)
 	#hdulist.info()			#displays info about the content of the file
 					#(what we use for Daospec has only ONE extension)
 	#print hdulist[0].header	#to print the whole header!
-	wave_base = hdulist[0].header['CRVAL1']	# Angstrom
+	wave_base = hdulist[ext].header['CRVAL1']	# Angstrom
 	try:
-		wave_step = hdulist[0].header['CD1_1']	# Angstrom
+		wave_step = hdulist[ext].header['CD1_1']	# Angstrom
 	except:
-		wave_step = hdulist[0].header['CDELT1']	# Angstrom
-	flux = hdulist[0].data
+		wave_step = hdulist[ext].header['CDELT1']	# Angstrom
+	flux = hdulist[ext].data
 	waveobs = np.arange(wave_base, wave_base+len(flux)*wave_step, wave_step)
 	if len(waveobs) == len(flux) + 1:
 		waveobs = waveobs[:-1]

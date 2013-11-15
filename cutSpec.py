@@ -4,7 +4,8 @@
 #    ./cutSpec.py spec.fits 4800 5800 specL.fits
 #    ./cutSpec.py spec.fits[1] 4800 5800 specL.fits
 #
-#NB: the output will always be in 64 bit, whatever the input!
+#NB: the output will be in 32 bit, whatever the input!
+#    the code can easily be modified to output 64bits.
 
 
 try:
@@ -69,7 +70,7 @@ hdulist.close()
 
 #Now keep only the requested wavelength range:
 cutFlux = [ f for f,w in zip(flux,waveobs) if w>minWAV and w<maxWAV ]
-cutFlux = np.array(cutFlux,dtype='float32')
+cutFlux = np.array(cutFlux,dtype='float32')	# <---- sets the data to 32bits format
 
 cutWaveobs = [ w for w in waveobs if w>minWAV and w<maxWAV ]
 
