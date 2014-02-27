@@ -15,6 +15,7 @@
 #		cdelt=0.0147	to resample with a step of 0.0147*
 #		rv=150	to add a 150km/h radial velocity (this increases the wavelength)
 #		-col3	to read flux from column 3 instead of 1 (nb: Python indices start at 0!)
+#		-usehead=/home/user/somefile.fits[3]		to insert the header of another file
 #
 #		*fits spectra assume a constant wavelength step, so if your original ascii is not on a
 #		 constant step you NEED to resample.
@@ -48,6 +49,7 @@ extension='.fits'
 resample=False
 radvel=0
 colFlux=1
+usehead=False
 for el in options:
 	if '-h' in el:
 		linesToRemove = int(el.split('-h')[1])
@@ -76,7 +78,8 @@ for el in options:
 		radvel=float(el[3:])
 	if '-col' in el:
 		colFlux=int(el[4:])
-		
+	if '-usehead' in el:
+		usehead=el.split('=')[1]
 
 
 
@@ -223,13 +226,30 @@ flux = numpy.array(flux,dtype='float32') #important for Daospec to have float32!
 os.system('rm -f '+outputSpectrum)
 pyfits.writeto(outputSpectrum,flux)
 
-header = pyfits.getheader(outputSpectrum)
-header.update('CRVAL1', wave_base, "wavelength zeropoint")
-header.update('CD1_1', wave_step, "wavelength step")
-header.update('CDELT1', wave_step, "wavelength step")
-header.update('CRPIX1', 1.0, "Pixel zeropoint")
-header.update('NAXIS', 1, "Number of axes")
-header.update('NAXIS1', len(flux), "Axis length")
+#insert a header:
+if usehead==False:
+	header = pyfits.getheader(outputSpectrum)
+	header.update('CRVAL1', wave_base, "wavelength zeropoint")
+	header.update('CD1_1', wave_step, "wavelength step")
+	header.update('CDELT1', wave_step, "wavelength step")
+	header.update('CRPIX1', 1.0, "Pixel zeropoint")
+	header.update('NAXIS', 1, "Number of axes")
+	header.update('NAXIS1', len(flux), "Axis length")
+else:	#take the header of another file:
+	if usehead[-1]==']':
+		ext = int( usehead.split('[')[1][:-1] )
+		otherfile = usehead.split('[')[0]
+	else:
+		ext = 0
+		otherfile = usehead
+	header = pyfits.getheader(otherfile,ext)
+	header.update('CRVAL1', wave_base, "wavelength zeropoint")
+	header.update('CD1_1', wave_step, "wavelength step")
+	header.update('CDELT1', wave_step, "wavelength step")
+	header.update('CRPIX1', 1.0, "Pixel zeropoint")
+	header.update('NAXIS', 1, "Number of axes")
+	header.update('NAXIS1', len(flux), "Axis length")
+
 
 os.system('rm -f '+outputSpectrum)
 pyfits.writeto(outputSpectrum,flux,header)

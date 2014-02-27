@@ -5,7 +5,7 @@
 #    ./cutSpec.py spec.fits[1] 4800 5800 specL.fits
 #
 #NB: the output will be in 32 bit, whatever the input!
-#    the code can easily be modified to output 64bits.
+#    (the code can easily be modified to output 64bit though)
 
 
 try:
@@ -28,11 +28,16 @@ try:
 	infile = sys.argv[1]
 	minWAV = float(sys.argv[2])
 	maxWAV = float(sys.argv[3])
-	outfile = sys.argv[4]
 except IndexError:
 	print 'The syntax is:'
 	print sys.argv[0], "file.txt -options"
 	sys.exit()
+
+#find the requested output file name, or set a default name if nothing specified:
+try:
+	outfile = sys.argv[4]
+except:
+	outfile = infile.replace('.fits','_cut.fits')
 
 #find in requested a specific extension, ext=0 if not:
 try:	

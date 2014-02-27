@@ -54,6 +54,10 @@ import sys
 c=299792.458
 
 dark = '-dark' in sys.argv
+if '-steps' in sys.argv:
+	drawstyle='steps-mid'
+else:
+	drawstyle=''
 
 
 #function that takes the arguments, reads the files and plots:
@@ -161,8 +165,8 @@ def actualseefits(argumentsList):
 
 
 		#########          Plot it:
-		plt.plot(waveobs, flux, color=colors[i], label=labels[i])
-
+		plt.plot(waveobs, flux, color=colors[i], label=labels[i],drawstyle=drawstyle)
+	return files[0]	#return the name of the first file
 
 
 
@@ -188,9 +192,9 @@ if len(sys.argv)==2 and sys.argv[1][0]=='@':
 		argumentsList=[sys.argv[0]]+content[i]
 		plt.ion()
 		plt.clf()
-		actualseefits(argumentsList)
+		title = actualseefits(argumentsList)
 		plt.draw()
-		spam=raw_input('Press ENTER for next plot.')
+		spam=raw_input(title+'\t  Press ENTER for next plot.')
 		if spam=='b':
 			i=i-1	#to step back
 		elif spam=='q':
@@ -213,9 +217,10 @@ else:
 		mpl.rc('savefig',facecolor='black',edgecolor='black')
 	else:
 		fig=plt.figure(1)
-	actualseefits(sys.argv)
+	title = actualseefits(sys.argv)
 	plt.ylabel('flux')
 	plt.xlabel('wavelength')
+	plt.title(title)
 	if labelOn==True:
 		plt.legend()
 	plt.show()
