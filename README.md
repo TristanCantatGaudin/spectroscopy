@@ -64,7 +64,3 @@ Degrade the resolution of a spectrum. If your spectrum has a fixed resolution, i
 
     ./degrade.py spectrum.fits 80000 47000
 
-
-addToPath.sh
-----------
-This BASH script adds aliases to your .bashrc file for these six scripts, so they can be used as commands from anywhere.
