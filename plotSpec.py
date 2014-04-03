@@ -53,6 +53,7 @@ import numpy as np
 import sys
 c=299792.458
 
+
 dark = '-dark' in sys.argv
 if '-steps' in sys.argv:
 	drawstyle='steps-mid'
@@ -177,6 +178,7 @@ def actualseefits(argumentsList):
 ############ MAIN BODY:
 #if the argument starts with a "@" then we batch-plot:
 if len(sys.argv)==2 and sys.argv[1][0]=='@':
+	logFileName=sys.argv[1][1:]+'.log'	# <-----! file in which to store the comments
 	instructionFile=sys.argv[1][1:]
 	content=[]
 	try:
@@ -194,16 +196,25 @@ if len(sys.argv)==2 and sys.argv[1][0]=='@':
 		plt.clf()
 		title = actualseefits(argumentsList)
 		plt.draw()
-		spam=raw_input(title+'\t  Press ENTER for next plot.')
+		if i==len(content)-1:
+			spam=raw_input(title+'\t  This is the last spectrum. ')
+		else:
+			spam=raw_input(title+'\t  Press ENTER for next plot. ')
 		if spam=='b':
 			i=i-1	#to step back
 		elif spam=='q':
 			sys.exit()
+		elif ('!' in spam):
+			if spam[0]=='!':	#to write comments
+				logFile = open(logFileName, "a")
+				comment=spam[1:]
+				logFile.write(title+'\t'+comment+'\n')
+				logFile.close()
 		else:
 			i=i+1	#to step forward
+
 		if i==len(content):
-			raw_input('Finished plotting.')
-			sys.exit()
+			i=i-1
 		
 #if it doesn't start with a "@" then just a normal plot:
 else:
