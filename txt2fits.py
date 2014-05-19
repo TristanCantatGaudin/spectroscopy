@@ -183,7 +183,7 @@ if fillNegatives==True:
 	sigma=numpy.std(flux)
 	for i,el in enumerate(flux):
 		if (el<0) or (el==0):
-			essai=median+0.3*sigma*(random.random()-0.5)
+			essai=median+0.1*sigma*(random.random()-0.5)
 			if essai>0:
 				flux[i]=essai
 			else:

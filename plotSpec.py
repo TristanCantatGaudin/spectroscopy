@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Tristan Cantat-Gaudin, 25/07/2013.
+#Tristan Cantat-Gaudin, 19/05/2014.
 #Quickly plot a .fits or ascii spectrum. You can also batch-plot (see below).
 #
 #	The available options are:
@@ -31,8 +31,12 @@
 #				./seefits @foo.bar
 #			Type ENTER in the prompt to clear the window and execute
 #			the next line of instructions.
+#			Type "!comment" to store comments in a log file
 #			Type b to go back to the previous line.
 #			Type q to exit.
+#
+#	On the plot window: keep "V" key pressed and click on H-alpha or H-beta
+#	line to estimate the radial velocity. (non-relativistic Doppler)
 #
 #	EXAMPLES:
 #		./seefits.py file.fits
@@ -59,6 +63,39 @@ if '-steps' in sys.argv:
 	drawstyle='steps-mid'
 else:
 	drawstyle=''
+
+
+
+#--------------------------- FUNCTIONS ---------------------------------------
+def on_click(event):
+	if event.key=='v':
+		wclick = event.xdata
+		line,vel = wav2radvel(wclick)
+		print vel,'km/s (using',str(line)+')'
+
+def wav2radvel(wavobs,wavrest=0):
+	'''
+	Input: observed wavelength, rest wavelength
+	Output: radial velocity
+	If no rest wavelength given, it assumes you mean H-alpha or H-beta (whichever is closest).
+	'''
+	wavHa=6562.797
+	wavHb=4861.323
+	if wavrest==0:
+		dist = wavobs - ((wavHa+wavHb)/2)
+		if dist>=0:
+			line = 'H-alpha'
+			wavrest = wavHa
+		else:
+			line = 'H-beta'
+			wavrest = wavHb
+	radvel=299792.458*( (1.*wavobs/wavrest) - 1)
+	return line,radvel
+
+
+
+
+
 
 
 #function that takes the arguments, reads the files and plots:
@@ -127,15 +164,24 @@ def actualseefits(argumentsList):
 				#hdulist.info()			#displays info about the content of the file
 								#(what we use for Daospec has only ONE extension)
 				#print hdulist[0].header	#to print the whole header!
-				wave_base = hdulist[exts[i]].header['CRVAL1']	# Angstrom
+
+				try:
+					pix_start = hdulist[exts[i]].header['CRPIX1']   # starting pixel
+				except:
+					pix_start = 1
 				try:
 					wave_step = hdulist[exts[i]].header['CD1_1']	# Angstrom
 				except:
 					wave_step = hdulist[exts[i]].header['CDELT1']	# Angstrom
+				wave_base = hdulist[exts[i]].header['CRVAL1']	# Angstrom
+				wave_base=wave_base+(1-pix_start)*wave_step
+				#(necessary in case CRPIX1 is not 1)
 				flux = hdulist[exts[i]].data
 				waveobs = np.arange(wave_base, wave_base+len(flux)*wave_step, wave_step)
+				#these ligns can solve issues with NumPy "arange":
 				if len(waveobs) == len(flux) + 1:
 					waveobs = waveobs[:-1]
+				#
 				waveobs = [el*(1+(rvs[i]/c)) for el in waveobs]
 				hdulist.close()
 				wave_step1=wave_step
@@ -216,7 +262,7 @@ if len(sys.argv)==2 and sys.argv[1][0]=='@':
 		if i==len(content):
 			i=i-1
 		
-#if it doesn't start with a "@" then just a normal plot:
+#if the argument doesn't start with a "@" then just a normal plot:
 else:
 	if dark==True:
 		fig=plt.figure(1,facecolor='black', edgecolor='black')
@@ -234,4 +280,5 @@ else:
 	plt.title(title)
 	if labelOn==True:
 		plt.legend()
+	fig.canvas.mpl_connect('button_press_event', on_click) #to handle clicks!
 	plt.show()

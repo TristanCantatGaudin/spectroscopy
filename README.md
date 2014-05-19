@@ -31,7 +31,7 @@ to print the header of the extension 0.
 
 txt2fits.py
 -----------
-Convert a spectrum in an ASCII table to a fits file. NB: the FITS format requires a constant step in wavelength, so if your data is not sampled on a constant step there is an option to resample it (in its current version the script isi quite slow at doing that, but works fine). More details about the options (especially the clean the spectrum, fill in gaps, avoid negative fluxes, cut spikes, add some radial velocity shift etc) in the file. Ex:
+Convert a spectrum in an ASCII table to a fits file. NB: the FITS format requires a constant step in wavelength, so if your data is not sampled on a constant step there is an option to resample it (in its current version the script is quite slow at doing that, but works fine). More details about the options (especially the clean the spectrum, fill in gaps, avoid negative fluxes, cut spikes, add some radial velocity shift etc) in the file. Ex:
 
     ./txt2fits.py spectrum.txt rv=35 
 
@@ -63,4 +63,6 @@ degrade.py
 Degrade the resolution of a spectrum. If your spectrum has a fixed resolution, it means the fw of the lines increases with the wavelength. Degrading the resolution is not just a convolution, because the width of the gaussian used for the convolution scales with the wavelength. This script reads an ASCII or FITS spectrum and writes the degraded one in a new file (of the same format as the input). Ex:
 
     ./degrade.py spectrum.fits 80000 47000
+
+The degrade_f.py script is the same, but uses a Fortran subroutine for the inner loop, that is compiled with f2py. The subroutine is actually included in the script itself, and is written and compiled at the first execution.
 
