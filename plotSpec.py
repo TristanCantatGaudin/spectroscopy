@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Tristan Cantat-Gaudin, 19/05/2014.
+#Tristan Cantat-Gaudin, 28/10/2014.
 #Quickly plot a .fits or ascii spectrum. You can also batch-plot (see below).
 #
 #	The available options are:
@@ -35,8 +35,13 @@
 #			Type b to go back to the previous line.
 #			Type q to exit.
 #
-#	On the plot window: keep "V" key pressed and click on H-alpha or H-beta
+#	On the plot window: keep "v" key pressed and click on H-alpha or H-beta
 #	line to estimate the radial velocity. (non-relativistic Doppler)
+#
+#			    keep "f" pressed and click points to follow a line profile
+#			    then keep "d" pressed and click anywhere to fit a gaussian profile
+#			    keep "x" pressed and click anywhere to erase all the fitted profiles
+#			    (this only works when plotting FITS spectra!)
 #
 #	EXAMPLES:
 #		./seefits.py file.fits
@@ -67,11 +72,46 @@ else:
 
 
 #--------------------------- FUNCTIONS ---------------------------------------
+#Defines what happens when a part of the plot is clicked on:
+global clicksForGaussian; clicksForGaussian=[]
+global plotElementsToDelete; plotElementsToDelete=[]
+global wave_step
+####################
 def on_click(event):
+	global clicksForGaussian, plotElementsToDelete, wave_step
 	if event.key=='v':
 		wclick = event.xdata
 		line,vel = wav2radvel(wclick)
 		print vel,'km/s (using',str(line)+')'
+
+	if event.key=='f': #keep f key pressed and click to follow a line profile
+		clicksForGaussian.append( [event.xdata,event.ydata] )
+		elementToDelete, = ax.plot(event.xdata,event.ydata,'ro')
+		plotElementsToDelete.append( elementToDelete )
+		#print clicksForGaussian
+	if event.key=='d': #click somewhere while pressing d to fit a gaussian to the defined set of points
+		if len(clicksForGaussian)==0:
+			print 'Keep f pressed and click points, then keep d pressed and click anywhere to fit a gaussian.'
+		else:
+			from scipy.optimize import curve_fit
+			xtofit,ytofit=zip(*clicksForGaussian)
+			def gaus(x,a,x0,sigma,y0):
+				return y0-a*np.exp(-(x-x0)**2/(2*sigma**2))
+			popt,pcov = curve_fit(gaus,xtofit,ytofit,p0=[max(ytofit)-min(ytofit),np.mean(xtofit),np.std(xtofit),max(ytofit)])
+			xtoplot=np.linspace(min(xtofit),max(xtofit),100)
+			elementToDelete, = ax.plot(xtoplot,gaus(xtoplot,*popt),'r-',lw=2)
+			plotElementsToDelete.append( elementToDelete )
+			EW=popt[0]*popt[2]*np.sqrt(2*np.pi)/max(ytofit) #a*sigma*sqrt(2pi), normalising to continuum level!
+			print 'WL=%8.3f  FWHM=%5.3fmA =%3.1fpx  EW=%5.3fmA' % (popt[1],10*2.3548*popt[2],2.35482*popt[2]/wave_step,1000*EW)
+			clicksForGaussian=[]
+	if event.key=='x': #click somwhere while pressing x to delete this line
+		for el in plotElementsToDelete:
+			ax.lines.remove(el)
+		plotElementsToDelete=[]
+		print 'Cleared.'
+
+
+
 
 def wav2radvel(wavobs,wavrest=0):
 	'''
@@ -100,6 +140,7 @@ def wav2radvel(wavobs,wavrest=0):
 
 #function that takes the arguments, reads the files and plots:
 def actualseefits(argumentsList):
+	global wave_step
 	#read the arguments:
 	options=[]
 	files=[]
@@ -275,6 +316,7 @@ else:
 	else:
 		fig=plt.figure(1)
 	title = actualseefits(sys.argv)
+	ax=fig.add_subplot(111)
 	plt.ylabel('flux')
 	plt.xlabel('wavelength')
 	plt.title(title)
